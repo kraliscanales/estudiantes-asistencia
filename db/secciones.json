@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "table": "secciones",
+    "id": 1,
+    "nombre": "Preescolar"
+  },
+  {
+    "table": "secciones",
+    "id": 2,
+    "nombre": "Primer Grado"
+  },
+  {
+    "table": "secciones",
+    "id": 3,
+    "nombre": "Segundo Grado"
+  },
+  {
+    "table": "secciones",
+    "id": 4,
+    "nombre": "Tercer Grado"
+  },
+  {
+    "table": "secciones",
+    "id": 5,
+    "nombre": "Cuarto Grado"
+  },
+  {
+    "table": "secciones",
+    "id": 6,
+    "nombre": "Quinto Grado"
+  },
+  {
+    "table": "secciones",
+    "id": 7,
+    "nombre": "Sexto Grado"
+  }
+]
