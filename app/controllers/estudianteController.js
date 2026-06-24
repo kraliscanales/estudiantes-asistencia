@@ -237,6 +237,77 @@ export default class EstudianteController {
     console.log(chalk.bgGreen.white("Estudiante actualizado exitosamente"));
     await Helper.esperar();
   }
+  async delete() {
+    console.clear();
+    console.log(chalk.bgRed.white("Eliminando estudiante..."));
+
+    const estudiantes = await this.estudiante.load();
+    if (estudiantes.length === 0) {
+      console.log(chalk.bgRed.white("No hay estudiantes registrados para eliminar."));
+      await Helper.esperar();
+      return;
+    }
+
+    const secciones = await this.seccion.load();
+
+    console.log(chalk.bgBlue.white("Estudiantes registrados:"));
+    const rows = estudiantes.map((e) => {
+      const seccion = secciones.find((s) => s.id === e.seccion_id);
+      return {
+        ID: e.id,
+        Nombre: e.nombre,
+        Sexo: e.sexo,
+        Edad: e.edad,
+        Seccion: seccion ? seccion.nombre : `ID: ${e.seccion_id}`,
+      };
+    });
+    console.table(rows);
+
+    let payload = await inquirer.prompt([
+      {
+        type: "input",
+        name: "id",
+        message: "Ingrese el ID del estudiante a eliminar:",
+        validate: (input) => {
+          if (input.trim() === "") return "El ID no puede estar vacío.";
+          if (isNaN(parseInt(input))) return "Debe ingresar un número válido.";
+          return true;
+        },
+      },
+    ]);
+
+    const id = parseInt(payload.id);
+    const index = estudiantes.findIndex((e) => e.id === id);
+    if (index === -1) {
+      console.log(chalk.bgRed.white("No se encontró un estudiante con ese ID."));
+      await Helper.esperar();
+      return;
+    }
+
+    const confirmacion = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "confirmar",
+        message: `¿Está seguro de eliminar al estudiante "${estudiantes[index].nombre}"?`,
+        default: false,
+      },
+    ]);
+
+    if (!confirmacion.confirmar) {
+      console.log(chalk.bgCyan.white("Operación cancelada."));
+      await Helper.esperar();
+      return;
+    }
+
+    estudiantes.splice(index, 1);
+    await this.estudiante.saveAll(estudiantes);
+
+    console.log();
+    console.log(chalk.bgGreen.white("Estudiante eliminado exitosamente"));
+    await Helper.esperar();
+  }
+  
+
 
   async init() {
     let opcion;
