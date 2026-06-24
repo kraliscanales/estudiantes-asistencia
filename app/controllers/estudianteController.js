@@ -105,6 +105,28 @@ export default class EstudianteController {
     console.log(chalk.bgGreen.white("Estudiante creado exitosamente"));
     await Helper.esperar();
   }
+   async read() {
+    console.log(chalk.bgBlue.white("Mostrando estudiantes..."));
+    console.log();
+
+    const estudiantes = await this.estudiante.load();
+    const secciones = await this.seccion.load();
+
+    const rows = estudiantes.map((e) => {
+      const seccion = secciones.find((s) => s.id === e.seccion_id);
+      return {
+        ID: e.id,
+        Nombre: e.nombre,
+        Sexo: e.sexo,
+        Edad: e.edad,
+        Seccion: seccion ? seccion.nombre : `ID: ${e.seccion_id}`,
+      };
+    });
+
+    console.table(rows);
+    console.log();
+    await Helper.esperar();
+  }
 
   async init() {
     let opcion;
