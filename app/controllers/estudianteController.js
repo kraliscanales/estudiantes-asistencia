@@ -306,8 +306,15 @@ export default class EstudianteController {
     console.log(chalk.bgGreen.white("Estudiante eliminado exitosamente"));
     await Helper.esperar();
   }
-  
 
+  async validateEstudiante(nombre, seccion_id) {
+    const estudiantes = await this.estudiante.load();
+    return estudiantes.find(
+      (e) =>
+        e.nombre.toLowerCase().trim() === nombre.toLowerCase().trim() &&
+        e.seccion_id === seccion_id,
+    );
+  }
 
   async init() {
     let opcion;
