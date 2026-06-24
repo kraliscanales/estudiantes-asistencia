@@ -128,6 +128,116 @@ export default class EstudianteController {
     await Helper.esperar();
   }
 
+    async update() {
+    console.clear();
+    console.log(chalk.bgYellow.white("Editando estudiante..."));
+
+    const estudiantes = await this.estudiante.load();
+    if (estudiantes.length === 0) {
+      console.log(chalk.bgRed.white("No hay estudiantes registrados para editar."));
+      await Helper.esperar();
+      return;
+    }
+
+    const secciones = await this.seccion.load();
+
+    console.log(chalk.bgBlue.white("Estudiantes registrados:"));
+    const rows = estudiantes.map((e) => {
+      const seccion = secciones.find((s) => s.id === e.seccion_id);
+      return {
+        ID: e.id,
+        Nombre: e.nombre,
+        Sexo: e.sexo,
+        Edad: e.edad,
+        Seccion: seccion ? seccion.nombre : `ID: ${e.seccion_id}`,
+      };
+    });
+    console.table(rows);
+
+    let payload = await inquirer.prompt([
+      {
+        type: "input",
+        name: "id",
+        message: "Ingrese el ID del estudiante a editar:",
+        validate: (input) => {
+          if (input.trim() === "") return "El ID no puede estar vacío.";
+          if (isNaN(parseInt(input))) return "Debe ingresar un número válido.";
+          return true;
+        },
+      },
+    ]);
+
+    const id = parseInt(payload.id);
+    const index = estudiantes.findIndex((e) => e.id === id);
+    if (index === -1) {
+      console.log(chalk.bgRed.white("No se encontró un estudiante con ese ID."));
+      await Helper.esperar();
+      return;
+    }
+
+    const estudiante = estudiantes[index];
+    const seccionActual = secciones.find((s) => s.id === estudiante.seccion_id);
+    console.log(
+      chalk.bgCyan.white(
+        "Deje el campo en blanco para mantener el valor actual.",
+      ),
+    );
+
+    let nuevosDatos = await inquirer.prompt([
+      {
+        type: "input",
+        name: "nombre",
+        message: `Nombre [${estudiante.nombre}]:`,
+      },
+      {
+        type: "input",
+        name: "sexo",
+        message: `Sexo (M/F) [${estudiante.sexo}]:`,
+      },
+      {
+        type: "input",
+        name: "edad",
+        message: `Edad [${estudiante.edad}]:`,
+      },
+    ]);
+
+    if (nuevosDatos.nombre.trim() !== "") estudiante.nombre = nuevosDatos.nombre.trim();
+    if (nuevosDatos.sexo.trim() !== "") estudiante.sexo = nuevosDatos.sexo.trim();
+    if (nuevosDatos.edad.trim() !== "") estudiante.edad = parseInt(nuevosDatos.edad.trim());
+
+    if (secciones.length > 0) {
+      const cambiarSeccion = await inquirer.prompt([
+        {
+          type: "confirm",
+          name: "cambiar",
+          message: `¿Desea cambiar la sección actual (${seccionActual ? seccionActual.nombre : "N/A"})?`,
+          default: false,
+        },
+      ]);
+
+      if (cambiarSeccion.cambiar) {
+        const nuevaSeccion = await inquirer.prompt([
+          {
+            type: "select",
+            name: "seccion",
+            message: "Seleccione la nueva sección:",
+            choices: secciones.map((s) => ({
+              name: s.nombre,
+              value: s,
+            })),
+          },
+        ]);
+        estudiante.seccion_id = nuevaSeccion.seccion.id;
+      }
+    }
+
+    await this.estudiante.saveAll(estudiantes);
+
+    console.log();
+    console.log(chalk.bgGreen.white("Estudiante actualizado exitosamente"));
+    await Helper.esperar();
+  }
+
   async init() {
     let opcion;
     do {
