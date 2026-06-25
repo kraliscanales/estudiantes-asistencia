@@ -20,12 +20,12 @@ export default class Helper {
     const setup = await inquirer.prompt([
       {
         type: "select",
-        name: "optCarrera",
+        name: "opcion",
         message: `¿Qué deseas hacer?`,
         choices: opciones,
       },
     ]);
 
-    return setup.optCarrera;
+    return setup.opcion;
   }
 }
